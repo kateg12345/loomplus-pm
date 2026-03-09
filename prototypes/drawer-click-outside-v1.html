@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务详情抽屉 - 点击外部关闭 | 交互原型</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #f5f7fa;
+            overflow-x: hidden;
+        }
+        
+        /* 主页面 */
+        .main-page {
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #718096;
+        }
+        
+        .task-list {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .task-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .task-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+        
+        .task-card h3 {
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .task-card p {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        /* 遮罩层 (Backdrop) */
+        .backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* 抽屉 (Drawer) */
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 600px;
+            max-width: 90vw;
+            background: white;
+            z-index: 1001;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .drawer.active {
+            transform: translateX(0);
+        }
+        
+        .drawer-header {
+            padding: 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .drawer-header h2 {
+            color: #2d3748;
+            font-size: 20px;
+        }
+        
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: #f7fafc;
+            color: #4a5568;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+        
+        .close-btn:hover {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+        
+        .drawer-content {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .section {
+            margin-bottom: 24px;
+        }
+        
+        .section h3 {
+            color: #2d3748;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .section p {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        
+        .meta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #bee3f8;
+            color: #2c5282;
+        }
+        
+        .actions {
+            padding: 16px 24px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        /* 说明提示 */
+        .hint {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 2000;
+            animation: fadeInDown 0.3s ease;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+        
+        .hint.hide {
+            animation: fadeOutUp 0.3s ease forwards;
+        }
+        
+        @keyframes fadeOutUp {
+            to {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .drawer {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 提示信息 -->
+    <div class="hint" id="hint">
+        💡 点击任意任务卡片打开详情抽屉
+    </div>
+    
+    <!-- 主页面 -->
+    <div class="main-page">
+        <div class="header">
+            <h1>🎨 Loom+ 任务列表</h1>
+            <p>交互原型：点击任务查看详情 → 点击外部关闭抽屉</p>
+        </div>
+        
+        <div class="task-list">
+            <div class="task-card" onclick="openDrawer('task1')">
+                <h3>任务详情抽屉支持点击外部区域关闭</h3>
+                <p>当前只能通过右上角关闭按钮关闭，用户体验不佳...</p>
+            </div>
+            
+            <div class="task-card" onclick="openDrawer('task2')">
+                <h3>优化任务详情抽屉结构 + 增加优先级字段展示</h3>
+                <p>抽屉内容结构优化，增加优先级字段...</p>
+            </div>
+            
+            <div class="task-card" onclick="openDrawer('task3')">
+                <h3>产品多语言支持（中文/英文）</h3>
+                <p>UI 界面支持多语言切换...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 遮罩层 -->
+    <div class="backdrop" id="backdrop" onclick="closeDrawer()"></div>
+    
+    <!-- 抽屉 -->
+    <div class="drawer" id="drawer" onclick="event.stopPropagation()">
+        <div class="drawer-header">
+            <h2 id="drawerTitle">任务详情</h2>
+            <button class="close-btn" onclick="closeDrawer()">×</button>
+        </div>
+        
+        <div class="drawer-content" id="drawerContent">
+            <div class="meta">
+                <div class="meta-item">
+                    <span>👤</span>
+                    <span>Jumor</span>
+                </div>
+                <div class="meta-item">
+                    <span>📅</span>
+                    <span>2026-03-09</span>
+                </div>
+                <div class="meta-item">
+                    <span class="badge">IN_PROGRESS</span>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>📋 需求背景</h3>
+                <p>当前任务详情以抽屉（Drawer）形式展示在页面右侧，用户仅能通过点击右上角的关闭按钮（×）退出查看。这种单一的关闭方式不符合用户对模态交互的认知习惯，影响操作效率。</p>
+            </div>
+            
+            <div class="section">
+                <h3>😫 用户痛点</h3>
+                <p>• 查看完任务详情后，用户必须移动鼠标到抽屉右上角才能关闭，操作路径较长<br>
+                • 当用户想快速切换查看其他任务或返回列表视图时，交互不够流畅<br>
+                • 缺少符合直觉的"点击空白区域关闭"交互模式，降低产品易用性</p>
+            </div>
+            
+            <div class="section">
+                <h3>💡 解决方案</h3>
+                <p>支持点击抽屉外的遮罩层（backdrop/overlay）关闭任务详情抽屉，提供更符合用户预期的交互体验。</p>
+            </div>
+            
+            <div class="section">
+                <h3>✅ 验收标准</h3>
+                <p>• 点击抽屉外的遮罩层，抽屉成功关闭<br>
+                • 点击抽屉内部任何内容（标题、描述、按钮等），抽屉不关闭<br>
+                • 右上角关闭按钮（×）功能正常<br>
+                • 关闭动画流畅，无卡顿<br>
+                • 移动端和桌面端均正常工作</p>
+            </div>
+            
+            <div class="section">
+                <h3>🔧 技术建议</h3>
+                <p>• 实现 backdrop/overlay 的 onClick 事件监听<br>
+                • 使用事件冒泡机制，抽屉内部阻止事件冒泡（stopPropagation）<br>
+                • 参考主流设计系统（Material Design、Ant Design）的 Drawer 组件实现</p>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn btn-primary">✅ 通过验收</button>
+            <button class="btn btn-secondary">📝 添加备注</button>
+            <button class="btn btn-secondary">👥 重新分配</button>
+        </div>
+    </div>
+    
+    <script>
+        const backdrop = document.getElementById('backdrop');
+        const drawer = document.getElementById('drawer');
+        const hint = document.getElementById('hint');
+        
+        // 3秒后隐藏提示
+        setTimeout(() => {
+            hint.classList.add('hide');
+            setTimeout(() => hint.remove(), 300);
+        }, 3000);
+        
+        function openDrawer(taskId) {
+            // 激活遮罩层和抽屉
+            backdrop.classList.add('active');
+            drawer.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // 根据任务ID更新内容（这里用同样的内容演示）
+            console.log('Opening task:', taskId);
+            
+            // 显示新提示
+            showHint('💡 试试点击抽屉外的灰色区域关闭');
+        }
+        
+        function closeDrawer() {
+            backdrop.classList.remove('active');
+            drawer.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            showHint('✅ 抽屉已关闭！点击任务卡片可以重新打开');
+        }
+        
+        function showHint(text) {
+            // 移除旧提示
+            const oldHints = document.querySelectorAll('.hint');
+            oldHints.forEach(h => h.remove());
+            
+            // 创建新提示
+            const newHint = document.createElement('div');
+            newHint.className = 'hint';
+            newHint.textContent = text;
+            document.body.appendChild(newHint);
+            
+            // 3秒后隐藏
+            setTimeout(() => {
+                newHint.classList.add('hide');
+                setTimeout(() => newHint.remove(), 300);
+            }, 3000);
+        }
+        
+        // 阻止抽屉内部点击事件冒泡
+        drawer.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
+        // ESC 键关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && drawer.classList.contains('active')) {
+                closeDrawer();
+                showHint('✅ 按 ESC 键也可以关闭抽屉');
+            }
+        });
+    </script>
+</body>
+</html>
