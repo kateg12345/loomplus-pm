@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优先级字段 v2 - 匹配 Loom+ 真实样式</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #fafbfc;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        
+        .header h1 {
+            color: #1a202c;
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+        
+        .header p {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .comparison-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .panel-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+        
+        .panel-header .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .panel-header .status-indicator.before {
+            background: #f56565;
+        }
+        
+        .panel-header .status-indicator.after {
+            background: #48bb78;
+        }
+        
+        /* Loom+ 风格的任务卡片 */
+        .task-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        
+        .task-item:hover {
+            border-color: #cbd5e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .task-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #2d3748;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .task-badges {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .task-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* From bot 标签（旧） */
+        .task-badge.from-bot {
+            background-color: #E3F2FD;
+            color: #1976D2;
+        }
+        
+        /* 优先级标签（新） */
+        .task-badge.priority-p0 {
+            background-color: #FFEBEE;
+            color: #C62828;
+            font-weight: 600;
+        }
+        
+        .task-badge.priority-p1 {
+            background-color: #FFF3E0;
+            color: #E65100;
+            font-weight: 600;
+        }
+        
+        .task-badge.priority-p2 {
+            background-color: #FFF9C4;
+            color: #F57F17;
+            font-weight: 500;
+        }
+        
+        .task-badge.priority-p3 {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            font-weight: 500;
+        }
+        
+        .task-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .task-meta-item {
+            font-size: 13px;
+            color: #4a5568;
+        }
+        
+        .task-meta-label {
+            color: #718096;
+            font-weight: 500;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .task-action-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-size: 12px;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .task-action-btn:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+        }
+        
+        /* 说明框 */
+        .explanation {
+            background: #f7fafc;
+            border-left: 3px solid #667eea;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-top: 16px;
+        }
+        
+        .explanation h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .explanation ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .explanation li {
+            font-size: 13px;
+            color: #4a5568;
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .explanation li:before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            color: #667eea;
+        }
+        
+        /* 抽屉 */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            display: none;
+            z-index: 1000;
+        }
+        
+        .drawer-overlay.active {
+            display: block;
+        }
+        
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: -650px;
+            bottom: 0;
+            width: 650px;
+            max-width: 90vw;
+            background: white;
+            box-shadow: -2px 0 16px rgba(0,0,0,0.1);
+            transition: right 0.25s ease;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .drawer.active {
+            right: 0;
+        }
+        
+        .drawer-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            position: relative;
+        }
+        
+        .drawer-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a202c;
+            padding-right: 40px;
+        }
+        
+        .drawer-close {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            border: none;
+            background: #f7fafc;
+            color: #4a5568;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            transition: all 0.15s;
+        }
+        
+        .drawer-close:hover {
+            background: #e2e8f0;
+        }
+        
+        .drawer-content {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .drawer-field {
+            margin-bottom: 20px;
+        }
+        
+        .drawer-field-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #718096;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .drawer-field-value {
+            font-size: 14px;
+            color: #2d3748;
+        }
+        
+        .priority-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .priority-option {
+            padding: 8px 14px;
+            border-radius: 4px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .priority-option:hover {
+            transform: translateY(-1px);
+        }
+        
+        .priority-option.p0 {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+        
+        .priority-option.p0.selected {
+            border-color: #C62828;
+            font-weight: 600;
+        }
+        
+        .priority-option.p1 {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+        
+        .priority-option.p1.selected {
+            border-color: #E65100;
+            font-weight: 600;
+        }
+        
+        .priority-option.p2 {
+            background: #FFF9C4;
+            color: #F57F17;
+        }
+        
+        .priority-option.p2.selected {
+            border-color: #F57F17;
+        }
+        
+        .priority-option.p3 {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+        
+        .priority-option.p3.selected {
+            border-color: #2E7D32;
+        }
+        
+        /* Toast 通知 */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1a202c;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 14px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast.hide {
+            animation: slideOut 0.3s ease forwards;
+        }
+        
+        @keyframes slideOut {
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .comparison-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 优先级字段设计 v2</h1>
+            <p>基于 Loom+ 真实页面样式 - 精确匹配</p>
+        </div>
+        
+        <div class="comparison-wrapper">
+            <!-- Before Panel -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="status-indicator before"></span>
+                    <h2>之前：From bot 标签</h2>
+                </div>
+                
+                <div class="task-item">
+                    <div class="task-title">【前端开发】实现任务详情抽屉点击外部关闭</div>
+                    <div class="task-badges">
+                        <span class="task-badge from-bot">From bot</span>
+                    </div>
+                    <div class="task-meta">
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Updated:</span> 3/9/2026, 5:07 PM
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Creator:</span> Kate
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Assignee:</span> Jumor
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Status:</span> In Progress
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action-btn">Logs</button>
+                        <button class="task-action-btn">Delete</button>
+                    </div>
+                </div>
+                
+                <div class="task-item">
+                    <div class="task-title">优化任务详情抽屉结构 + 增加优先级字段展示</div>
+                    <div class="task-badges">
+                        <span class="task-badge from-bot">From bot</span>
+                    </div>
+                    <div class="task-meta">
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Updated:</span> 3/8/2026, 2:15 PM
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Creator:</span> Kate
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Assignee:</span> Jumor
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Status:</span> In Progress
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action-btn">Logs</button>
+                        <button class="task-action-btn">Delete</button>
+                    </div>
+                </div>
+                
+                <div class="explanation">
+                    <h3>❌ 问题</h3>
+                    <ul>
+                        <li>"From bot" 只说明任务来源</li>
+                        <li>无法传达任务优先级</li>
+                        <li>团队不清楚先处理哪个</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- After Panel -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="status-indicator after"></span>
+                    <h2>之后：优先级标签（点击查看抽屉）</h2>
+                </div>
+                
+                <div class="task-item" onclick="openDrawer('p0')">
+                    <div class="task-title">【前端开发】实现任务详情抽屉点击外部关闭</div>
+                    <div class="task-badges">
+                        <span class="task-badge priority-p0">P0</span>
+                    </div>
+                    <div class="task-meta">
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Updated:</span> 3/9/2026, 5:07 PM
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Creator:</span> Kate
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Assignee:</span> Jumor
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Status:</span> In Progress
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action-btn">Logs</button>
+                        <button class="task-action-btn">Delete</button>
+                    </div>
+                </div>
+                
+                <div class="task-item" onclick="openDrawer('p1')">
+                    <div class="task-title">优化任务详情抽屉结构 + 增加优先级字段展示</div>
+                    <div class="task-badges">
+                        <span class="task-badge priority-p1">P1</span>
+                    </div>
+                    <div class="task-meta">
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Updated:</span> 3/8/2026, 2:15 PM
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Creator:</span> Kate
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Assignee:</span> Jumor
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Status:</span> In Progress
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action-btn">Logs</button>
+                        <button class="task-action-btn">Delete</button>
+                    </div>
+                </div>
+                
+                <div class="task-item" onclick="openDrawer('p2')">
+                    <div class="task-title">知识库语义检索能力开发</div>
+                    <div class="task-badges">
+                        <span class="task-badge priority-p2">P2</span>
+                    </div>
+                    <div class="task-meta">
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Updated:</span> 3/7/2026, 10:30 AM
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Creator:</span> Kate
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Assignee:</span> Backend Team
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Status:</span> In Progress
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action-btn">Logs</button>
+                        <button class="task-action-btn">Delete</button>
+                    </div>
+                </div>
+                
+                <div class="task-item" onclick="openDrawer('p3')">
+                    <div class="task-title">会议自动生成摘要功能</div>
+                    <div class="task-badges">
+                        <span class="task-badge priority-p3">P3</span>
+                    </div>
+                    <div class="task-meta">
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Updated:</span> 3/6/2026, 3:45 PM
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Creator:</span> Kate
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Assignee:</span> AI Team
+                        </div>
+                        <div class="task-meta-item">
+                            <span class="task-meta-label">Status:</span> Planning
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action-btn">Logs</button>
+                        <button class="task-action-btn">Delete</button>
+                    </div>
+                </div>
+                
+                <div class="explanation">
+                    <h3>✅ 改进</h3>
+                    <ul>
+                        <li>清晰的优先级视觉标识</li>
+                        <li>快速识别紧急任务</li>
+                        <li>提升团队协作效率</li>
+                        <li>可在抽屉中编辑优先级</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Drawer -->
+    <div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+    
+    <div class="drawer" id="drawer">
+        <div class="drawer-header">
+            <div class="drawer-title" id="drawerTitle">任务详情</div>
+            <button class="drawer-close" onclick="closeDrawer()">×</button>
+        </div>
+        
+        <div class="drawer-content">
+            <div class="drawer-field">
+                <div class="drawer-field-label">Priority</div>
+                <div class="priority-selector">
+                    <div class="priority-option p0" onclick="selectPriority('p0', this)">
+                        P0 紧急
+                    </div>
+                    <div class="priority-option p1" onclick="selectPriority('p1', this)">
+                        P1 高
+                    </div>
+                    <div class="priority-option p2" onclick="selectPriority('p2', this)">
+                        P2 中
+                    </div>
+                    <div class="priority-option p3" onclick="selectPriority('p3', this)">
+                        P3 低
+                    </div>
+                </div>
+            </div>
+            
+            <div class="drawer-field">
+                <div class="drawer-field-label">Status</div>
+                <div class="drawer-field-value">In Progress</div>
+            </div>
+            
+            <div class="drawer-field">
+                <div class="drawer-field-label">Assignee</div>
+                <div class="drawer-field-value">Jumor</div>
+            </div>
+            
+            <div class="drawer-field">
+                <div class="drawer-field-label">Creator</div>
+                <div class="drawer-field-value">Kate</div>
+            </div>
+            
+            <div class="drawer-field">
+                <div class="drawer-field-label">Updated</div>
+                <div class="drawer-field-value">3/9/2026, 5:07 PM</div>
+            </div>
+            
+            <div class="drawer-field">
+                <div class="drawer-field-label">Description</div>
+                <div class="drawer-field-value">
+                    当前任务详情以抽屉（Drawer）形式展示在页面右侧，用户仅能通过点击右上角的关闭按钮（×）退出查看。这种单一的关闭方式不符合用户对模态交互的认知习惯，影响操作效率。
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentPriority = 'p0';
+        
+        function openDrawer(priority) {
+            currentPriority = priority;
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById('drawer').classList.add('active');
+            
+            // Select priority
+            const options = document.querySelectorAll('.priority-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`.priority-option.${priority}`).classList.add('selected');
+        }
+        
+        function closeDrawer() {
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('drawer').classList.remove('active');
+        }
+        
+        function selectPriority(priority, element) {
+            currentPriority = priority;
+            
+            const options = document.querySelectorAll('.priority-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            showToast(`✅ 优先级已更新为 ${getPriorityName(priority)}`);
+        }
+        
+        function getPriorityName(priority) {
+            const map = {
+                'p0': 'P0 紧急',
+                'p1': 'P1 高',
+                'p2': 'P2 中',
+                'p3': 'P3 低'
+            };
+            return map[priority];
+        }
+        
+        function showToast(text) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = text;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('drawer').classList.contains('active')) {
+                closeDrawer();
+            }
+        });
+    </script>
+</body>
+</html>
