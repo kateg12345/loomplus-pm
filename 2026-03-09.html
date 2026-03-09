@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loom+ PM Dashboard | 2026-03-09</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+        
+        .header .meta {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card .label {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a202c;
+        }
+        
+        .stat-card.done .value { color: #48bb78; }
+        .stat-card.review .value { color: #ed8936; }
+        .stat-card.progress .value { color: #4299e1; }
+        .stat-card.unassigned .value { color: #a0aec0; }
+        
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section h2 {
+            font-size: 20px;
+            color: #1a202c;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .task-list {
+            list-style: none;
+        }
+        
+        .task-item {
+            padding: 16px;
+            border-left: 4px solid #e2e8f0;
+            margin-bottom: 12px;
+            background: #f7fafc;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .task-item:hover {
+            background: #edf2f7;
+            transform: translateX(4px);
+        }
+        
+        .task-item.urgent {
+            border-left-color: #f56565;
+        }
+        
+        .task-item .title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .task-item .meta {
+            color: #718096;
+            font-size: 14px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge.review { background: #fed7d7; color: #c53030; }
+        .badge.done { background: #c6f6d5; color: #22543d; }
+        .badge.progress { background: #bee3f8; color: #2c5282; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+        
+        .project-card {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid #4299e1;
+        }
+        
+        .project-card h3 {
+            color: #2d3748;
+            margin-bottom: 12px;
+        }
+        
+        .progress-bar {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            height: 100%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌅 Loom+ PM Dashboard</h1>
+            <div class="meta">
+                2026-03-09 | UTC+3 上午 10:21 | Kate, 早安！☕
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card done">
+                <div class="label">✅ 已完成</div>
+                <div class="value">30</div>
+            </div>
+            <div class="stat-card review">
+                <div class="label">🔍 待 Review</div>
+                <div class="value">11</div>
+            </div>
+            <div class="stat-card progress">
+                <div class="label">⚙️ 进行中</div>
+                <div class="value">7</div>
+            </div>
+            <div class="stat-card unassigned">
+                <div class="label">📋 未分配</div>
+                <div class="value">16</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🔴 需要你 Review 的任务 (11个)</h2>
+            <ul class="task-list">
+                <li class="task-item urgent">
+                    <div class="title">
+                        <span class="badge review">REVIEW</span>
+                        Provide Loom+ User Guide
+                    </div>
+                    <div class="meta">
+                        <span>👤 Kate</span>
+                        <span>📅 3/7 更新</span>
+                        <span>⏰ 最紧急</span>
+                    </div>
+                </li>
+                <li class="task-item urgent">
+                    <div class="title">
+                        <span class="badge review">REVIEW</span>
+                        把Nav里的account移除掉
+                    </div>
+                    <div class="meta">
+                        <span>👤 Kate</span>
+                        <span>📅 3/6 更新</span>
+                    </div>
+                </li>
+                <li class="task-item urgent">
+                    <div class="title">
+                        <span class="badge review">REVIEW</span>
+                        MCP新增 links tool
+                    </div>
+                    <div class="meta">
+                        <span>👤 Kate</span>
+                        <span>📅 3/6 更新</span>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="title">
+                        <span class="badge review">REVIEW</span>
+                        优化知识库 Document List 页面
+                    </div>
+                    <div class="meta">
+                        <span>👤 Kate</span>
+                        <span>📅 3/5 更新</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>📊 项目概览</h2>
+            
+            <div class="project-card">
+                <h3>Loom+进化 (问题跟踪)</h3>
+                <div class="meta">
+                    <span>✅ 完成: 23</span>
+                    <span>🔍 Review: 11</span>
+                    <span>❌ 取消: 2</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: 64%;"></div>
+                </div>
+                <div class="meta" style="margin-top: 8px;">完成率: 64%</div>
+            </div>
+            
+            <div class="project-card">
+                <h3>Loom+需求管理 (需求跟踪)</h3>
+                <div class="meta">
+                    <span>✅ 完成: 8</span>
+                    <span>⚙️ 进行中: 6</span>
+                    <span>📋 未分配: 16</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: 24%;"></div>
+                </div>
+                <div class="meta" style="margin-top: 8px;">完成率: 24%</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🎉 昨夜新完成 (2个)</h2>
+            <ul class="task-list">
+                <li class="task-item">
+                    <div class="title">
+                        <span class="badge done">DONE</span>
+                        产品多语言支持（中文/英文）
+                    </div>
+                    <div class="meta">
+                        <span>✅ 完成于 04:08</span>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="title">
+                        <span class="badge done">DONE</span>
+                        成员可用时间协调（投票/日程偏好）
+                    </div>
+                    <div class="meta">
+                        <span>✅ 完成于 04:08</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>💡 今日建议</h2>
+            <div style="line-height: 1.8; color: #4a5568;">
+                <p style="margin-bottom: 12px;">
+                    <strong>🔴 紧急（建议今日处理）</strong><br>
+                    Review 积压严重：11 个任务待处理，建议优先处理最近 3 个（User Guide、Nav移除、MCP links）
+                </p>
+                <p style="margin-bottom: 12px;">
+                    <strong>🟡 重要（本周处理）</strong><br>
+                    检查 6 个 IN_PROGRESS 任务进展，可能有阻塞
+                </p>
+                <p>
+                    <strong>💡 优化建议</strong><br>
+                    可以批量 Review 相关功能（如知识库的 5 个任务）
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
