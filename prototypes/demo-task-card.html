@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loom+ 任务卡片原型 - v1</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        .header p {
+            color: #718096;
+        }
+        .task-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .task-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            transform: translateY(-4px);
+        }
+        .task-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        .task-card.review::before { background: #ed8936; }
+        .task-card.progress::before { background: #4299e1; }
+        .task-card.done::before { background: #48bb78; }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+        .badges {
+            display: flex;
+            gap: 8px;
+        }
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge.review { background: #fed7d7; color: #c53030; }
+        .badge.progress { background: #bee3f8; color: #2c5282; }
+        .badge.done { background: #c6f6d5; color: #22543d; }
+        .badge.priority { background: #fef5e7; color: #c5710d; border: 2px solid #f39c12; }
+        .task-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 12px;
+        }
+        .task-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .task-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .task-description {
+            color: #4a5568;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        .progress-bar {
+            background: #e2e8f0;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.3s;
+        }
+        .filter-bar {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #4a5568;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn.active {
+            border-color: #667eea;
+            background: #f7fafc;
+            color: #667eea;
+            font-weight: 600;
+        }
+        .filter-btn:hover {
+            border-color: #667eea;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .stat-value.review { color: #ed8936; }
+        .stat-value.progress { color: #4299e1; }
+        .stat-value.done { color: #48bb78; }
+        .stat-label {
+            color: #718096;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Loom+ 任务卡片原型</h1>
+            <p>交互式原型 - 可以点击和体验</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value review">7</div>
+                <div class="stat-label">待 Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value progress">6</div>
+                <div class="stat-label">进行中</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value done">23</div>
+                <div class="stat-label">已完成</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <span style="color: #4a5568; font-weight: 600;">筛选：</span>
+            <button class="filter-btn active" onclick="filterTasks('all')">全部</button>
+            <button class="filter-btn" onclick="filterTasks('review')">待 Review</button>
+            <button class="filter-btn" onclick="filterTasks('progress')">进行中</button>
+            <button class="filter-btn" onclick="filterTasks('done')">已完成</button>
+        </div>
+
+        <div class="task-card review">
+            <div class="card-header">
+                <div class="badges">
+                    <span class="badge review">REVIEW</span>
+                    <span class="badge priority">⚡ 紧急</span>
+                </div>
+            </div>
+            <div class="task-title">Provide Loom+ User Guide</div>
+            <div class="task-meta">
+                <span>👤 Kate</span>
+                <span>📅 3/7 更新</span>
+                <span>⏰ 3天前</span>
+            </div>
+            <div class="task-description">
+                用户指南需要评估内容质量和完整性，包含产品功能介绍、使用流程、常见问题等模块。
+            </div>
+            <div class="task-actions">
+                <button class="btn btn-primary" onclick="alert('✅ 任务通过验收')">✅ 通过</button>
+                <button class="btn btn-secondary" onclick="alert('❌ 需要修改')">❌ 退回</button>
+                <button class="btn btn-secondary" onclick="alert('👁️ 查看详情')">👁️ 详情</button>
+            </div>
+        </div>
+
+        <div class="task-card progress">
+            <div class="card-header">
+                <div class="badges">
+                    <span class="badge progress">IN_PROGRESS</span>
+                </div>
+            </div>
+            <div class="task-title">任务模型新增 tag/category 字段</div>
+            <div class="task-meta">
+                <span>👤 Jumor</span>
+                <span>📅 3/2 更新</span>
+                <span>⏰ 7天前</span>
+            </div>
+            <div class="task-description">
+                数据库模型扩展，支持任务分类和标签筛选功能，包含 MCP API 更新。
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 60%;"></div>
+            </div>
+            <div class="task-actions">
+                <button class="btn btn-secondary" onclick="alert('⚠️ 检查进度')">⚠️ 检查进度</button>
+                <button class="btn btn-secondary" onclick="alert('💬 添加备注')">💬 备注</button>
+            </div>
+        </div>
+
+        <div class="task-card done">
+            <div class="card-header">
+                <div class="badges">
+                    <span class="badge done">DONE</span>
+                </div>
+            </div>
+            <div class="task-title">产品多语言支持（中文/英文）</div>
+            <div class="task-meta">
+                <span>👤 Jumor</span>
+                <span>✅ 昨天完成</span>
+            </div>
+            <div class="task-description">
+                UI 界面支持中英文切换，包含 i18n 配置和翻译文件。
+            </div>
+            <div class="task-actions">
+                <button class="btn btn-secondary" onclick="alert('🎉 庆祝完成')">🎉 庆祝</button>
+                <button class="btn btn-secondary" onclick="alert('👁️ 查看详情')">👁️ 详情</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterTasks(status) {
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const cards = document.querySelectorAll('.task-card');
+            cards.forEach(card => {
+                if (status === 'all' || card.classList.contains(status)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
