@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loom+ Scrum Board | Sprint 1 - 2026-03-09</title>
+    <title>PM Scrum Board | 2026-03-09</title>
     <style>
         * {
             margin: 0;
@@ -25,7 +25,7 @@
         
         .header {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 20px;
@@ -35,7 +35,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
         }
         
         h1 {
@@ -43,131 +42,117 @@
             color: #667eea;
         }
         
-        .sprint-info {
-            text-align: right;
-        }
-        
-        .sprint-label {
+        .date {
             font-size: 14px;
             color: #666;
-            margin-bottom: 5px;
         }
         
-        .sprint-number {
+        .projects-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .project-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+        
+        .project-title {
             font-size: 24px;
             font-weight: bold;
-            color: #764ba2;
         }
         
-        .sprint-goal {
-            background: #f0f4ff;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-            margin-bottom: 15px;
-        }
+        .project-title.loom { color: #667eea; }
+        .project-title.love { color: #ff6b9d; }
         
-        .sprint-goal h3 {
+        .project-stats {
+            display: flex;
+            gap: 20px;
             font-size: 14px;
-            color: #667eea;
-            margin-bottom: 8px;
-            text-transform: uppercase;
         }
         
-        .sprint-goal p {
-            font-size: 16px;
-            color: #333;
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
-        .metrics {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+        .stat-label {
+            color: #999;
         }
         
-        .metric-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        
-        .metric-label {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-        
-        .metric-value {
-            font-size: 32px;
+        .stat-value {
             font-weight: bold;
             color: #667eea;
-        }
-        
-        .metric-sub {
-            font-size: 14px;
-            color: #999;
-            margin-top: 5px;
         }
         
         .board {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 15px;
         }
         
         .column {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            min-height: 500px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 200px;
         }
         
         .column-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
         }
         
         .column-title {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
+            color: #666;
         }
         
         .column-count {
             background: #667eea;
             color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 14px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
             font-weight: bold;
         }
         
         .column.backlog .column-count { background: #95a5a6; }
         .column.todo .column-count { background: #3498db; }
-        .column.in-progress .column-count { background: #f39c12; }
+        .column.doing .column-count { background: #f39c12; }
         .column.done .column-count { background: #27ae60; }
         
         .card {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            border-left: 4px solid;
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.2s;
         }
         
         .card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             transform: translateX(2px);
         }
         
@@ -176,37 +161,10 @@
         .card.p2 { border-left-color: #3498db; }
         .card.p3 { border-left-color: #95a5a6; }
         
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .card-priority {
-            font-size: 10px;
-            font-weight: bold;
-            padding: 2px 8px;
-            border-radius: 4px;
-            color: white;
-        }
-        
-        .card-priority.p0 { background: #e74c3c; }
-        .card-priority.p1 { background: #f39c12; }
-        .card-priority.p2 { background: #3498db; }
-        .card-priority.p3 { background: #95a5a6; }
-        
-        .card-points {
-            font-size: 12px;
-            font-weight: bold;
-            color: #667eea;
-        }
-        
         .card-title {
-            font-size: 14px;
-            margin-bottom: 8px;
+            font-weight: 500;
+            margin-bottom: 4px;
             color: #333;
-            line-height: 1.4;
         }
         
         .card-meta {
@@ -216,110 +174,67 @@
             color: #999;
         }
         
-        .assignee {
-            font-weight: 500;
-        }
-        
-        .insights {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
-        
-        .insight-card {
+        .summary {
             background: white;
-            padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .insight-card h3 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #667eea;
-        }
-        
-        .insight-item {
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-        
-        .insight-item.urgent {
-            background: #fee;
-            border-left: 4px solid #e74c3c;
-            color: #c0392b;
-        }
-        
-        .insight-item.warning {
-            background: #fef5e7;
-            border-left: 4px solid #f39c12;
-            color: #d68910;
-        }
-        
-        .insight-item.success {
-            background: #eafaf1;
-            border-left: 4px solid #27ae60;
-            color: #1e8449;
-        }
-        
-        .standup {
-            background: white;
             padding: 25px;
-            border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-top: 20px;
         }
         
-        .standup h3 {
-            font-size: 18px;
-            margin-bottom: 15px;
+        .summary h2 {
+            font-size: 20px;
             color: #667eea;
-        }
-        
-        .standup-section {
             margin-bottom: 15px;
         }
         
-        .standup-section h4 {
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .summary-section {
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .summary-section h3 {
             font-size: 14px;
             color: #764ba2;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
         }
         
-        .standup-section ul {
+        .summary-section ul {
             list-style: none;
-            padding-left: 0;
+            padding: 0;
         }
         
-        .standup-section li {
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
+        .summary-section li {
+            padding: 6px 0;
+            font-size: 13px;
+            color: #666;
         }
         
-        .standup-section li:last-child {
-            border-bottom: none;
+        .summary-section li:before {
+            content: "• ";
+            color: #667eea;
+            font-weight: bold;
         }
         
         @media (max-width: 1200px) {
             .board {
                 grid-template-columns: repeat(2, 1fr);
             }
-            .metrics {
-                grid-template-columns: repeat(2, 1fr);
+            .summary-grid {
+                grid-template-columns: 1fr;
             }
         }
         
         @media (max-width: 768px) {
             .board {
-                grid-template-columns: 1fr;
-            }
-            .metrics {
-                grid-template-columns: 1fr;
-            }
-            .insights {
                 grid-template-columns: 1fr;
             }
         }
@@ -330,302 +245,354 @@
         <!-- Header -->
         <div class="header">
             <div class="header-top">
-                <h1>🚀 Loom+ Scrum Board</h1>
-                <div class="sprint-info">
-                    <div class="sprint-label">Current Sprint</div>
-                    <div class="sprint-number">Sprint 1</div>
-                </div>
-            </div>
-            
-            <div class="sprint-goal">
-                <h3>🎯 Sprint Goal</h3>
-                <p>完成进行中任务 + Review 积压清理，建立自动化工作流基础</p>
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; font-size: 13px; color: #666;">
-                <div><strong>Sprint Duration:</strong> 2 weeks (2026-03-09 - 2026-03-23)</div>
-                <div><strong>Day:</strong> 1 of 14</div>
+                <h1>📊 PM Scrum Board</h1>
+                <div class="date">2026-03-09 | Sprint Day 1</div>
             </div>
         </div>
         
-        <!-- Metrics -->
-        <div class="metrics">
-            <div class="metric-card">
-                <div class="metric-label">Story Points</div>
-                <div class="metric-value">34</div>
-                <div class="metric-sub">Committed</div>
-            </div>
-            
-            <div class="metric-card">
-                <div class="metric-label">Velocity</div>
-                <div class="metric-value">28</div>
-                <div class="metric-sub">Last Sprint Avg</div>
-            </div>
-            
-            <div class="metric-card">
-                <div class="metric-label">Completed</div>
-                <div class="metric-value">23</div>
-                <div class="metric-sub">64% Done</div>
-            </div>
-            
-            <div class="metric-card">
-                <div class="metric-label">Burndown</div>
-                <div class="metric-value">11</div>
-                <div class="metric-sub">Points Remaining</div>
-            </div>
-        </div>
-        
-        <!-- Scrum Board -->
-        <div class="board">
-            <!-- Backlog -->
-            <div class="column backlog">
-                <div class="column-header">
-                    <div class="column-title">📋 Backlog</div>
-                    <div class="column-count">15</div>
-                </div>
-                
-                <div class="card p0">
-                    <div class="card-header">
-                        <span class="card-priority p0">P0</span>
-                        <span class="card-points">5 pts</span>
+        <!-- Loom+ Project -->
+        <div class="project-section">
+            <div class="project-header">
+                <div class="project-title loom">🚀 Loom+ Project</div>
+                <div class="project-stats">
+                    <div class="stat">
+                        <span class="stat-label">Backlog:</span>
+                        <span class="stat-value">15</span>
                     </div>
-                    <div class="card-title">知识库语义检索能力</div>
-                    <div class="card-meta">
-                        <span class="assignee">Unassigned</span>
-                        <span>RICE: 1.6</span>
+                    <div class="stat">
+                        <span class="stat-label">In Progress:</span>
+                        <span class="stat-value">9</span>
                     </div>
-                </div>
-                
-                <div class="card p0">
-                    <div class="card-header">
-                        <span class="card-priority p0">P0</span>
-                        <span class="card-points">3 pts</span>
-                    </div>
-                    <div class="card-title">聊天消息自动识别任务</div>
-                    <div class="card-meta">
-                        <span class="assignee">Unassigned</span>
-                        <span>RICE: 1.5</span>
-                    </div>
-                </div>
-                
-                <div class="card p1">
-                    <div class="card-header">
-                        <span class="card-priority p1">P1</span>
-                        <span class="card-points">2 pts</span>
-                    </div>
-                    <div class="card-title">任务状态自动更新</div>
-                    <div class="card-meta">
-                        <span class="assignee">Unassigned</span>
-                        <span>RICE: 1.4</span>
-                    </div>
-                </div>
-                
-                <div class="card p2">
-                    <div class="card-header">
-                        <span class="card-priority p2">P2</span>
-                        <span class="card-points">3 pts</span>
-                    </div>
-                    <div class="card-title">会议纪要自动摘要</div>
-                    <div class="card-meta">
-                        <span class="assignee">Unassigned</span>
-                        <span>RICE: 1.2</span>
+                    <div class="stat">
+                        <span class="stat-label">Done:</span>
+                        <span class="stat-value">23</span>
                     </div>
                 </div>
             </div>
             
-            <!-- To Do -->
-            <div class="column todo">
-                <div class="column-header">
-                    <div class="column-title">📝 To Do</div>
-                    <div class="column-count">2</div>
-                </div>
-                
-                <div class="card p0">
-                    <div class="card-header">
-                        <span class="card-priority p0">P0</span>
-                        <span class="card-points">2 pts</span>
+            <div class="board">
+                <!-- Backlog -->
+                <div class="column backlog">
+                    <div class="column-header">
+                        <div class="column-title">📋 Backlog</div>
+                        <div class="column-count">15</div>
                     </div>
-                    <div class="card-title">任务详情抽屉点击外部关闭</div>
-                    <div class="card-meta">
-                        <span class="assignee">Jumor</span>
-                        <span>Frontend</span>
+                    
+                    <div class="card p0">
+                        <div class="card-title">知识库语义检索</div>
+                        <div class="card-meta">
+                            <span>RICE: 1.6</span>
+                            <span>5 pts</span>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="card p1">
-                    <div class="card-header">
-                        <span class="card-priority p1">P1</span>
-                        <span class="card-points">1 pt</span>
+                    
+                    <div class="card p0">
+                        <div class="card-title">消息自动识别任务</div>
+                        <div class="card-meta">
+                            <span>RICE: 1.5</span>
+                            <span>3 pts</span>
+                        </div>
                     </div>
-                    <div class="card-title">优先级字段替换 From bot</div>
-                    <div class="card-meta">
-                        <span class="assignee">Jumor</span>
-                        <span>Frontend</span>
+                    
+                    <div class="card p1">
+                        <div class="card-title">任务状态自动更新</div>
+                        <div class="card-meta">
+                            <span>RICE: 1.4</span>
+                            <span>2 pts</span>
+                        </div>
                     </div>
-                </div>
-            </div>
-            
-            <!-- In Progress -->
-            <div class="column in-progress">
-                <div class="column-header">
-                    <div class="column-title">⚙️ In Progress</div>
-                    <div class="column-count">7</div>
-                </div>
-                
-                <div class="card p0">
-                    <div class="card-header">
-                        <span class="card-priority p0">P0</span>
-                        <span class="card-points">3 pts</span>
-                    </div>
-                    <div class="card-title">任务到期自动提醒</div>
-                    <div class="card-meta">
-                        <span class="assignee">Backend Team</span>
-                        <span>Day 3</span>
+                    
+                    <div class="card p2">
+                        <div class="card-title">会议纪要自动摘要</div>
+                        <div class="card-meta">
+                            <span>Backend</span>
+                            <span>3 pts</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="card p1">
-                    <div class="card-header">
-                        <span class="card-priority p1">P1</span>
-                        <span class="card-points">2 pts</span>
+                <!-- To Do -->
+                <div class="column todo">
+                    <div class="column-header">
+                        <div class="column-title">📝 To Do</div>
+                        <div class="column-count">2</div>
                     </div>
-                    <div class="card-title">任务 tag/category 字段</div>
-                    <div class="card-meta">
-                        <span class="assignee">Backend Team</span>
-                        <span>Day 2</span>
+                    
+                    <div class="card p0">
+                        <div class="card-title">抽屉点击外部关闭</div>
+                        <div class="card-meta">
+                            <span>Jumor</span>
+                            <span>2 pts</span>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="card p2">
-                    <div class="card-header">
-                        <span class="card-priority p2">P2</span>
-                        <span class="card-points">1 pt</span>
-                    </div>
-                    <div class="card-title">知识库文档预览优化</div>
-                    <div class="card-meta">
-                        <span class="assignee">Jumor</span>
-                        <span>Day 1</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Done -->
-            <div class="column done">
-                <div class="column-header">
-                    <div class="column-title">✅ Done</div>
-                    <div class="column-count">23</div>
-                </div>
-                
-                <div class="card p0">
-                    <div class="card-header">
-                        <span class="card-priority p0">P0</span>
-                        <span class="card-points">3 pts</span>
-                    </div>
-                    <div class="card-title">MCP 集成与验证</div>
-                    <div class="card-meta">
-                        <span class="assignee">PM Agent</span>
-                        <span>✓ Today</span>
+                    
+                    <div class="card p1">
+                        <div class="card-title">优先级字段替换</div>
+                        <div class="card-meta">
+                            <span>Jumor</span>
+                            <span>1 pt</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="card p1">
-                    <div class="card-header">
-                        <span class="card-priority p1">P1</span>
-                        <span class="card-points">2 pts</span>
+                <!-- Doing -->
+                <div class="column doing">
+                    <div class="column-header">
+                        <div class="column-title">⚙️ Doing</div>
+                        <div class="column-count">7</div>
                     </div>
-                    <div class="card-title">GitHub Pages 部署</div>
-                    <div class="card-meta">
-                        <span class="assignee">PM Agent</span>
-                        <span>✓ Today</span>
+                    
+                    <div class="card p0">
+                        <div class="card-title">任务到期自动提醒</div>
+                        <div class="card-meta">
+                            <span>Backend</span>
+                            <span>Day 3</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p1">
+                        <div class="card-title">任务 tag/category</div>
+                        <div class="card-meta">
+                            <span>Backend</span>
+                            <span>Day 2</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p2">
+                        <div class="card-title">知识库文档预览</div>
+                        <div class="card-meta">
+                            <span>Jumor</span>
+                            <span>Day 1</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="card p1">
-                    <div class="card-header">
-                        <span class="card-priority p1">P1</span>
-                        <span class="card-points">1 pt</span>
+                <!-- Done -->
+                <div class="column done">
+                    <div class="column-header">
+                        <div class="column-title">✅ Done</div>
+                        <div class="column-count">23</div>
                     </div>
-                    <div class="card-title">原型设计工作流</div>
-                    <div class="card-meta">
-                        <span class="assignee">PM Agent</span>
-                        <span>✓ Today</span>
+                    
+                    <div class="card p0">
+                        <div class="card-title">MCP 集成验证</div>
+                        <div class="card-meta">
+                            <span>PM Agent</span>
+                            <span>✓</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p1">
+                        <div class="card-title">GitHub Pages 部署</div>
+                        <div class="card-meta">
+                            <span>PM Agent</span>
+                            <span>✓</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p1">
+                        <div class="card-title">原型设计工作流</div>
+                        <div class="card-meta">
+                            <span>PM Agent</span>
+                            <span>✓</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p1">
+                        <div class="card-title">自动化验收系统</div>
+                        <div class="card-meta">
+                            <span>PM Agent</span>
+                            <span>✓</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Insights & Blockers -->
-        <div class="insights">
-            <div class="insight-card">
-                <h3>🔍 Sprint Insights</h3>
-                
-                <div class="insight-item urgent">
-                    <strong>🔴 Review 积压严重</strong><br>
-                    11 个任务待处理，建议优先处理最近 3 个（User Guide、Nav移除、MCP links）
-                </div>
-                
-                <div class="insight-item warning">
-                    <strong>🟡 进行中任务可能阻塞</strong><br>
-                    7 个 IN_PROGRESS 任务需要检查进展，避免 Sprint 后期积压
-                </div>
-                
-                <div class="insight-item success">
-                    <strong>🟢 批量优化机会</strong><br>
-                    知识库相关的 5 个任务可以批量 Review，提高效率
-                </div>
-                
-                <div class="insight-item success">
-                    <strong>🟢 自动化工作流已建立</strong><br>
-                    7 大自动化工作流已完成，将显著提升团队效率
+        <!-- Love Island Project -->
+        <div class="project-section">
+            <div class="project-header">
+                <div class="project-title love">💕 AI Love Island Project</div>
+                <div class="project-stats">
+                    <div class="stat">
+                        <span class="stat-label">Backlog:</span>
+                        <span class="stat-value">8</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">In Progress:</span>
+                        <span class="stat-value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Done:</span>
+                        <span class="stat-value">7</span>
+                    </div>
                 </div>
             </div>
             
-            <div class="insight-card">
-                <h3>🚧 Blockers</h3>
-                
-                <div class="insight-item warning">
-                    <strong>MCP 知识库搜索接口缺失</strong><br>
-                    阻塞多个 Use Case，需要后端优先处理
+            <div class="board">
+                <!-- Backlog -->
+                <div class="column backlog">
+                    <div class="column-header">
+                        <div class="column-title">📋 Backlog</div>
+                        <div class="column-count">8</div>
+                    </div>
+                    
+                    <div class="card p1">
+                        <div class="card-title">数据导出功能</div>
+                        <div class="card-meta">
+                            <span>V2</span>
+                            <span>3 pts</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p1">
+                        <div class="card-title">自定义 NPC</div>
+                        <div class="card-meta">
+                            <span>V2</span>
+                            <span>5 pts</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p2">
+                        <div class="card-title">音效系统</div>
+                        <div class="card-meta">
+                            <span>Enhancement</span>
+                            <span>2 pts</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p2">
+                        <div class="card-title">社交网络图</div>
+                        <div class="card-meta">
+                            <span>V2</span>
+                            <span>5 pts</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p3">
+                        <div class="card-title">多语言支持</div>
+                        <div class="card-meta">
+                            <span>Future</span>
+                            <span>3 pts</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="insight-item warning">
-                    <strong>Telegram 群组配置未完成</strong><br>
-                    已暂时放弃，继续使用私聊方式
+                <!-- To Do -->
+                <div class="column todo">
+                    <div class="column-header">
+                        <div class="column-title">📝 To Do</div>
+                        <div class="column-count">0</div>
+                    </div>
+                </div>
+                
+                <!-- Doing -->
+                <div class="column doing">
+                    <div class="column-header">
+                        <div class="column-title">⚙️ Doing</div>
+                        <div class="column-count">0</div>
+                    </div>
+                </div>
+                
+                <!-- Done -->
+                <div class="column done">
+                    <div class="column-header">
+                        <div class="column-title">✅ Done</div>
+                        <div class="column-count">7</div>
+                    </div>
+                    
+                    <div class="card p0">
+                        <div class="card-title">MVP PRD</div>
+                        <div class="card-meta">
+                            <span>PM Agent</span>
+                            <span>✓</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p0">
+                        <div class="card-title">Next.js 框架</div>
+                        <div class="card-meta">
+                            <span>PM Agent</span>
+                            <span>✓</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p0">
+                        <div class="card-title">像素风格设计</div>
+                        <div class="card-meta">
+                            <span>PM Agent</span>
+                            <span>✓</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p0">
+                        <div class="card-title">12 NPC 模拟</div>
+                        <div class="card-meta">
+                            <span>PM Agent</span>
+                            <span>✓</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p1">
+                        <div class="card-title">NPC Profile 弹窗</div>
+                        <div class="card-meta">
+                            <span>PM Agent</span>
+                            <span>✓</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p1">
+                        <div class="card-title">游戏教程</div>
+                        <div class="card-meta">
+                            <span>PM Agent</span>
+                            <span>✓</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card p1">
+                        <div class="card-title">历史回看功能</div>
+                        <div class="card-meta">
+                            <span>PM Agent</span>
+                            <span>✓</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- Daily Standup -->
-        <div class="standup">
-            <h3>📅 Daily Standup - 2026-03-09</h3>
+        <!-- Summary -->
+        <div class="summary">
+            <h2>📅 Today's Summary</h2>
             
-            <div class="standup-section">
-                <h4>✅ Yesterday (Sprint Start)</h4>
-                <ul>
-                    <li>搭建 7 大自动化工作流（早报、验收、分配、原型设计等）</li>
-                    <li>验收 16 个 REVIEW 任务，5 个自动通过</li>
-                    <li>部署 GitHub Pages + 原型设计系统</li>
-                    <li>完成 AI Love Island MVP（29 分钟开发 + 部署）</li>
-                    <li>安装 86 个 Lenny's Skills</li>
-                </ul>
-            </div>
-            
-            <div class="standup-section">
-                <h4>🎯 Today</h4>
-                <ul>
-                    <li>清理 Review 积压（优先 3 个最新任务）</li>
-                    <li>检查 7 个 IN_PROGRESS 任务进展</li>
-                    <li>准备明天自动早报（UTC+3 07:30）</li>
-                    <li>更新项目知识库</li>
-                </ul>
-            </div>
-            
-            <div class="standup-section">
-                <h4>🚧 Blockers</h4>
-                <ul>
-                    <li>MCP 知识库搜索接口缺失 - 需要后端支持</li>
-                    <li>Telegram 群组配置未完成 - 已暂时放弃</li>
-                </ul>
+            <div class="summary-grid">
+                <div class="summary-section">
+                    <h3>✅ Completed</h3>
+                    <ul>
+                        <li>7 大自动化工作流</li>
+                        <li>验收 16 个任务</li>
+                        <li>GitHub Pages 部署</li>
+                        <li>Love Island MVP 完整交付</li>
+                        <li>安装 86 个 Lenny's Skills</li>
+                    </ul>
+                </div>
+                
+                <div class="summary-section">
+                    <h3>🎯 Tomorrow</h3>
+                    <ul>
+                        <li>清理 Review 积压（11 个）</li>
+                        <li>检查 IN_PROGRESS 进展</li>
+                        <li>自动早报准备</li>
+                        <li>知识库更新</li>
+                    </ul>
+                </div>
+                
+                <div class="summary-section">
+                    <h3>🚧 Blockers</h3>
+                    <ul>
+                        <li>MCP 知识库搜索接口缺失</li>
+                        <li>Telegram 群组配置未完成</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
