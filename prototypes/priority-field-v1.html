@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优先级字段原型 - Loom+</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #718096;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .side {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .side h2 {
+            color: #2d3748;
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+        
+        .side.before {
+            border-top: 4px solid #e53e3e;
+        }
+        
+        .side.after {
+            border-top: 4px solid #48bb78;
+        }
+        
+        .task-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .task-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        
+        .task-title {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 15px;
+        }
+        
+        .badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        /* Old style - From bot */
+        .badge.from-bot {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        /* Status badges */
+        .badge.status-review {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .badge.status-progress {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+        
+        /* Priority badges - NEW */
+        .badge.priority-p0 {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #fc8181;
+        }
+        
+        .badge.priority-p1 {
+            background: #fed7aa;
+            color: #c5710d;
+            border: 1px solid #f6ad55;
+        }
+        
+        .badge.priority-p2 {
+            background: #fef5e7;
+            color: #c5a10d;
+            border: 1px solid #f6e05e;
+        }
+        
+        .badge.priority-p3 {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #68d391;
+        }
+        
+        .task-meta {
+            display: flex;
+            gap: 12px;
+            color: #718096;
+            font-size: 13px;
+        }
+        
+        /* Drawer overlay */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            z-index: 1000;
+        }
+        
+        .drawer-overlay.active {
+            display: block;
+        }
+        
+        /* Drawer */
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: -600px;
+            bottom: 0;
+            width: 600px;
+            max-width: 90vw;
+            background: white;
+            box-shadow: -4px 0 24px rgba(0,0,0,0.2);
+            transition: right 0.3s ease;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .drawer.active {
+            right: 0;
+        }
+        
+        .drawer-header {
+            padding: 24px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .drawer-header h2 {
+            color: #2d3748;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: #f7fafc;
+            color: #4a5568;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .close-btn:hover {
+            background: #e2e8f0;
+        }
+        
+        .drawer-content {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .field-group {
+            margin-bottom: 24px;
+        }
+        
+        .field-label {
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .field-value {
+            color: #2d3748;
+            font-size: 15px;
+        }
+        
+        .priority-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .priority-option {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .priority-option:hover {
+            transform: translateY(-2px);
+        }
+        
+        .priority-option.p0 {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .priority-option.p0.selected {
+            border-color: #c53030;
+        }
+        
+        .priority-option.p1 {
+            background: #fed7aa;
+            color: #c5710d;
+        }
+        
+        .priority-option.p1.selected {
+            border-color: #c5710d;
+        }
+        
+        .priority-option.p2 {
+            background: #fef5e7;
+            color: #c5a10d;
+        }
+        
+        .priority-option.p2.selected {
+            border-color: #c5a10d;
+        }
+        
+        .priority-option.p3 {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .priority-option.p3.selected {
+            border-color: #22543d;
+        }
+        
+        .priority-option.unset {
+            background: #e2e8f0;
+            color: #718096;
+        }
+        
+        .priority-option.unset.selected {
+            border-color: #718096;
+        }
+        
+        .hint {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 2000;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -10px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+        
+        .legend {
+            background: #f7fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+        
+        .legend h3 {
+            color: #2d3748;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        
+        .legend-items {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        
+        @media (max-width: 1024px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hint" id="hint">
+        💡 点击任务卡片查看详情抽屉中的优先级字段
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🎨 优先级字段原型 - Loom+</h1>
+            <p>对比：移除 "From bot" 标签 → 增加优先级字段</p>
+        </div>
+        
+        <div class="comparison">
+            <!-- Before -->
+            <div class="side before">
+                <h2>❌ 之前：From bot 标签</h2>
+                
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-title">任务详情抽屉支持点击外部区域关闭</div>
+                    </div>
+                    <div class="badges">
+                        <span class="badge status-review">REVIEW</span>
+                        <span class="badge from-bot">From bot</span>
+                    </div>
+                    <div class="task-meta">
+                        <span>👤 Jumor</span>
+                        <span>📅 3/9</span>
+                    </div>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-title">优化任务详情抽屉结构 + 增加优先级字段展示</div>
+                    </div>
+                    <div class="badges">
+                        <span class="badge status-progress">IN_PROGRESS</span>
+                        <span class="badge from-bot">From bot</span>
+                    </div>
+                    <div class="task-meta">
+                        <span>👤 Jumor</span>
+                        <span>📅 3/8</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 16px; background: #fff5f5; border-left: 4px solid #e53e3e; border-radius: 4px;">
+                    <strong style="color: #c53030;">问题：</strong>
+                    <ul style="margin-top: 8px; padding-left: 20px; color: #4a5568;">
+                        <li>"From bot" 只说明来源，不传达优先级</li>
+                        <li>无法快速识别紧急任务</li>
+                        <li>团队不清楚先处理哪个任务</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- After -->
+            <div class="side after">
+                <h2>✅ 之后：优先级标签</h2>
+                
+                <div class="task-card" onclick="openDrawer('p0')">
+                    <div class="task-header">
+                        <div class="task-title">任务详情抽屉支持点击外部区域关闭</div>
+                    </div>
+                    <div class="badges">
+                        <span class="badge status-review">REVIEW</span>
+                        <span class="badge priority-p0">P0 紧急</span>
+                    </div>
+                    <div class="task-meta">
+                        <span>👤 Jumor</span>
+                        <span>📅 3/9</span>
+                    </div>
+                </div>
+                
+                <div class="task-card" onclick="openDrawer('p1')">
+                    <div class="task-header">
+                        <div class="task-title">优化任务详情抽屉结构 + 增加优先级字段展示</div>
+                    </div>
+                    <div class="badges">
+                        <span class="badge status-progress">IN_PROGRESS</span>
+                        <span class="badge priority-p1">P1 高</span>
+                    </div>
+                    <div class="task-meta">
+                        <span>👤 Jumor</span>
+                        <span>📅 3/8</span>
+                    </div>
+                </div>
+                
+                <div class="task-card" onclick="openDrawer('p2')">
+                    <div class="task-header">
+                        <div class="task-title">知识库语义检索能力</div>
+                    </div>
+                    <div class="badges">
+                        <span class="badge status-progress">IN_PROGRESS</span>
+                        <span class="badge priority-p2">P2 中</span>
+                    </div>
+                    <div class="task-meta">
+                        <span>👤 后端团队</span>
+                        <span>📅 3/7</span>
+                    </div>
+                </div>
+                
+                <div class="task-card" onclick="openDrawer('p3')">
+                    <div class="task-header">
+                        <div class="task-title">会议自动生成摘要</div>
+                    </div>
+                    <div class="badges">
+                        <span class="badge status-progress">IN_PROGRESS</span>
+                        <span class="badge priority-p3">P3 低</span>
+                    </div>
+                    <div class="task-meta">
+                        <span>👤 AI团队</span>
+                        <span>📅 3/6</span>
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <h3>优先级说明</h3>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <span class="badge priority-p0">P0</span>
+                            <span>紧急 - 影响用户或阻塞其他任务</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="badge priority-p1">P1</span>
+                            <span>高 - 重要功能，本周完成</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="badge priority-p2">P2</span>
+                            <span>中 - 计划中，本月完成</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="badge priority-p3">P3</span>
+                            <span>低 - 优化项，按需完成</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Drawer Overlay -->
+    <div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+    
+    <!-- Drawer -->
+    <div class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h2 id="drawerTitle">任务详情</h2>
+            <button class="close-btn" onclick="closeDrawer()">×</button>
+        </div>
+        
+        <div class="drawer-content">
+            <div class="field-group">
+                <div class="field-label">状态</div>
+                <div class="field-value">
+                    <span class="badge status-review">REVIEW</span>
+                </div>
+            </div>
+            
+            <div class="field-group">
+                <div class="field-label">优先级 ⭐</div>
+                <div class="priority-selector" id="prioritySelector">
+                    <div class="priority-option p0" onclick="selectPriority('p0', this)">
+                        🔴 P0 紧急
+                    </div>
+                    <div class="priority-option p1" onclick="selectPriority('p1', this)">
+                        🟠 P1 高
+                    </div>
+                    <div class="priority-option p2" onclick="selectPriority('p2', this)">
+                        🟡 P2 中
+                    </div>
+                    <div class="priority-option p3" onclick="selectPriority('p3', this)">
+                        🟢 P3 低
+                    </div>
+                    <div class="priority-option unset" onclick="selectPriority('unset', this)">
+                        ⚪ 未设置
+                    </div>
+                </div>
+            </div>
+            
+            <div class="field-group">
+                <div class="field-label">负责人</div>
+                <div class="field-value">👤 Jumor</div>
+            </div>
+            
+            <div class="field-group">
+                <div class="field-label">创建时间</div>
+                <div class="field-value">📅 2026-03-09</div>
+            </div>
+            
+            <div class="field-group">
+                <div class="field-label">描述</div>
+                <div class="field-value">
+                    当前任务详情以抽屉（Drawer）形式展示在页面右侧，用户仅能通过点击右上角的关闭按钮（×）退出查看...
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentPriority = 'p0';
+        
+        function openDrawer(priority) {
+            currentPriority = priority;
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById('drawer').classList.add('active');
+            
+            // Update selected priority
+            const options = document.querySelectorAll('.priority-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`.priority-option.${priority}`).classList.add('selected');
+            
+            // Hide hint
+            const hint = document.getElementById('hint');
+            if (hint) hint.remove();
+        }
+        
+        function closeDrawer() {
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('drawer').classList.remove('active');
+        }
+        
+        function selectPriority(priority, element) {
+            currentPriority = priority;
+            
+            // Update UI
+            const options = document.querySelectorAll('.priority-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            // Show feedback
+            showFeedback(`✅ 优先级已更新为 ${getPriorityText(priority)}`);
+        }
+        
+        function getPriorityText(priority) {
+            const map = {
+                'p0': 'P0 紧急',
+                'p1': 'P1 高',
+                'p2': 'P2 中',
+                'p3': 'P3 低',
+                'unset': '未设置'
+            };
+            return map[priority];
+        }
+        
+        function showFeedback(text) {
+            const feedback = document.createElement('div');
+            feedback.className = 'hint';
+            feedback.textContent = text;
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                feedback.style.animation = 'fadeOut 0.3s';
+                setTimeout(() => feedback.remove(), 300);
+            }, 2000);
+        }
+        
+        // Auto-hide initial hint
+        setTimeout(() => {
+            const hint = document.getElementById('hint');
+            if (hint) {
+                hint.style.animation = 'fadeOut 0.3s';
+                setTimeout(() => hint.remove(), 300);
+            }
+        }, 4000);
+    </script>
+</body>
+</html>
